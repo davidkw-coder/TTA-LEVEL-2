@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Book</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-xl">
+    <h1 class="text-3xl font-extrabold text-gray-800 text-center mb-6">Recipe Book</h1>
+    
+    <!-- Recipe Form Section -->
+    <form id="recipe-form" class="mb-6 space-y-4">
+      <input type="hidden" id="recipe-id">
+      <div>
+        <label for="recipe-name" class="block text-sm font-medium text-gray-700">Recipe Name</label>
+        <input type="text" id="recipe-name" class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400" required>
+      </div>
+      <div>
+        <label for="recipe-ingredients" class="block text-sm font-medium text-gray-700">Ingredients</label>
+        <textarea id="recipe-ingredients" class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400" required></textarea>
+      </div>
+      <button type="submit" class="w-full bg-indigo-500 text-white py-2 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Save Recipe</button>
+    </form>
+
+    <!-- Recipe List Section -->
+    <div id="recipe-list" class="space-y-4"></div>
+  </div>
+
+  <script>
+    // JavaScript for managing recipes and the Recipe Book App
+    
+    // Get references to HTML elements
+    const recipeForm = document.getElementById('recipe-form');
+    const recipeList = document.getElementById('recipe-list');
+    const recipeNameInput = document.getElementById('recipe-name');
+    const recipeIngredientsInput = document.getElementById('recipe-ingredients');
+    const recipeIdInput = document.getElementById('recipe-id');
+
+    // Array to store the list of recipes
+    let recipes = [];
+
+    // Handle the form submission to save the recipe
+    recipeForm.addEventListener('submit', (e) => {
+      e.preventDefault();  // Prevent default form submission behavior
+      const id = recipeIdInput.value;
+      const name = recipeNameInput.value.trim();
+      const ingredients = recipeIngredientsInput.value.trim();
+
+      // If both name and ingredients are provided, save or update the recipe
+      if (name && ingredients) {
+        if (id) {
+          // Update existing recipe
+          recipes = recipes.map(recipe => recipe.id == id ? { ...recipe, name, ingredients } : recipe);
+        } else {
+          // Add new recipe
+          recipes.push({ id: Date.now(), name, ingredients });
+        }
+        renderRecipes();  // Render the updated recipe list
+        recipeForm.reset();  // Reset the form
+        recipeIdInput.value = '';  // Clear hidden input for id
+      }
+    });
+
+    // Function to render the list of recipes
+    function renderRecipes() {
+      recipeList.innerHTML = '';  // Clear the current list
+      recipes.forEach((recipe) => {
+        // Create HTML structure for each recipe item
+        const recipeItem = document.createElement('div');
+        recipeItem.className = 'p-5 bg-white rounded-lg shadow-lg flex flex-col';
+        recipeItem.innerHTML = `
+          <h3 class='text-lg font-bold text-gray-800'>${recipe.name}</h3>
+          <p class='text-sm text-gray-600 mt-2'>${recipe.ingredients}</p>
+          <div class='mt-4 flex justify-between'>
+            <button class='bg-yellow-500 text-white px-3 py-1 rounded-lg shadow-md transition-transform transform hover:scale-105' onclick='editRecipe(${recipe.id})'>Edit</button>
+            <button class='bg-red-500 text-white px-3 py-1 rounded-lg shadow-md transition-transform transform hover:scale-105' onclick='deleteRecipe(${recipe.id})'>Delete</button>
+          </div>
+        `;
+        recipeList.appendChild(recipeItem);  // Append the recipe item to the list
+      });
+    }
+
+    // Function to edit a recipe
+    function editRecipe(id) {
+      const recipe = recipes.find(recipe => recipe.id === id);
+      if (recipe) {
+        recipeIdInput.value = recipe.id;  // Set the hidden input to the recipe id
+        recipeNameInput.value = recipe.name;  // Set the name input field to the recipe name
+        recipeIngredientsInput.value = recipe.ingredients;  // Set the ingredients input field to the recipe ingredients
+      }
+    }
+
+    // Function to delete a recipe
+    function deleteRecipe(id) {
+      // Remove the recipe with the matching id
+      recipes = recipes.filter(recipe => recipe.id !== id);
+      renderRecipes();  // Re-render the recipe list
+    }
+
+    renderRecipes();  // Initially render any existing recipes
+  </script>
+</body>
+</html>
